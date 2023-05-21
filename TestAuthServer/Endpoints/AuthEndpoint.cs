@@ -23,7 +23,9 @@ public static class AuthEndpoint
             .AllowAnonymous();
 
         routes
-            .MapGet("external-login", ExternalLogin);
+            .MapGet("external-google-login", ExternalLogin)
+            .WithDisplayName("Login with Google")
+            .WithDescription("Login using google authentication provider");
 
         routes
             .MapGet("external-callback", ExternalAuthCallback);
@@ -33,22 +35,14 @@ public static class AuthEndpoint
             .Produces<RegisterResponse>(201)
             .Produces<RegisterResponse>(400)
             .AllowAnonymous();
-
-        routes
-            .MapGet("delete", async (UserManager<User> userManager) =>
-            {
-                var user = await userManager.FindByEmailAsync("manuaradhya07@gmail.com");
-                await userManager.DeleteAsync(user);
-                return "ok";
-            });
         
-        routes
-            .MapGet("sign-out", async (HttpContext ctx, SignInManager<User> signInManager) =>
-            {
-                await ctx.SignOutAsync(IdentityConstants.ExternalScheme);
-                await signInManager.SignOutAsync();
-                return "ok";
-            });
+        //routes
+        //    .MapGet("sign-out", async (HttpContext ctx, SignInManager<User> signInManager) =>
+        //    {
+        //        await ctx.SignOutAsync(IdentityConstants.ExternalScheme);
+        //        await signInManager.SignOutAsync();
+        //        return "ok";
+        //    });
 
         routes
             .MapGet("profile", Profile)
@@ -58,7 +52,7 @@ public static class AuthEndpoint
     }
 
     private static IResult ExternalLogin(
-        SignInManager<User> signInManager,
+        [FromServices] SignInManager<User> signInManager,
         [FromQuery] string returnUrl = "/"
         )
     {
